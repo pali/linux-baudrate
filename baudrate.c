@@ -119,7 +119,6 @@ main(int argc, char *argv[])
         if (argc == 4) {
             n = atoi(argv[3]);
             bn = map_n_to_bn(n);
-            /* Clear the current input baud rate and fill a new value */
             if (n != 0 && bn == B0) {
 #ifdef BOTHER
                 bn = BOTHER;
@@ -131,7 +130,12 @@ main(int argc, char *argv[])
             }
         }
 
-        if ((tio.c_cflag & CBAUD) != bn) {
+        /* Clear the current input baud rate and fill a new value */
+        if ((tio.c_cflag & CBAUD) != bn
+#ifdef BOTHER
+            || (bn == BOTHER && tio.c_ospeed != n)
+#endif
+           ) {
 #ifdef IBSHIFT
             tio.c_cflag &= ~(CBAUD << IBSHIFT);
             tio.c_cflag |= bn << IBSHIFT;
