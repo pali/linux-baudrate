@@ -53,7 +53,7 @@ map_bn_to_n(tcflag_t bn)
             return map[i].n;
     }
 
-    return 0;
+    return (unsigned int)-1;
 }
 
 
@@ -143,7 +143,7 @@ main(int argc, char *argv[])
             tio.c_ispeed = n;
 #endif
 #else
-            fprintf(stderr, "split baud rates are unsupported\n", n);
+            fprintf(stderr, "split baud rates are unsupported\n");
             close(fd);
             exit(EXIT_FAILURE);
 #endif
@@ -190,7 +190,11 @@ main(int argc, char *argv[])
     else
 #endif
         n = map_bn_to_n(bn);
-    printf("output baud rate: %u\n", n);
+    printf("output baud rate: ");
+    if (n != (unsigned int)-1)
+        printf("%u\n", n);
+    else
+        printf("unknown\n");
 
 #ifdef IBSHIFT
     bn = (tio.c_cflag >> IBSHIFT) & CBAUD;
@@ -203,7 +207,11 @@ main(int argc, char *argv[])
     else
 #endif
         n = map_bn_to_n(bn);
-    printf("input baud rate: %u\n", n);
+    printf("input baud rate: ");
+    if (n != (unsigned int)-1)
+        printf("%u\n", n);
+    else
+        printf("unknown\n");
 
     close(fd);
     exit(EXIT_SUCCESS);
