@@ -10,8 +10,7 @@
 #include <unistd.h>
 
 #define B(n) { B##n, n }
-static
-struct { tcflag_t bn; unsigned int n; }
+static struct { tcflag_t bn; unsigned int n; }
 map[] =
 {
     B(0), B(50), B(75), B(110), B(134), B(150), B(200), B(300), B(600),
@@ -28,8 +27,7 @@ map[] =
 };
 #undef B
 
-static
-tcflag_t
+static tcflag_t
 map_n_to_bn(unsigned int n)
 {
     size_t i;
@@ -42,8 +40,7 @@ map_n_to_bn(unsigned int n)
     return B0;
 }
 
-static
-unsigned int
+static unsigned int
 map_bn_to_n(tcflag_t bn)
 {
     size_t i;
@@ -55,7 +52,6 @@ map_bn_to_n(tcflag_t bn)
 
     return (unsigned int)-1;
 }
-
 
 int
 main(int argc, char *argv[])
@@ -71,7 +67,7 @@ main(int argc, char *argv[])
     int fd, rc;
 
     if (argc != 2 && argc != 3 && argc != 4) {
-        fprintf(stderr, "Usage: %s device [output [input] ]\n", argv[0]);
+        fprintf(stderr, "Usage: %s device [output [input]]\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
