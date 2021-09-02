@@ -40,6 +40,7 @@ map_n_to_bn(unsigned int n)
     return B0;
 }
 
+#ifndef BOTHER
 static unsigned int
 map_bn_to_n(tcflag_t bn)
 {
@@ -52,6 +53,7 @@ map_bn_to_n(tcflag_t bn)
 
     return (unsigned int)-1;
 }
+#endif
 
 int
 main(int argc, char *argv[])
@@ -145,7 +147,7 @@ main(int argc, char *argv[])
 #endif
         } else {
 #ifdef IBSHIFT
-            /* B0 sets the input baud to the output baud rate */
+            /* B0 sets the input baud rate to the output baud rate */
             tio.c_cflag &= ~(CBAUD << IBSHIFT);
             tio.c_cflag |= B0 << IBSHIFT;
 #ifdef BOTHER
@@ -179,30 +181,32 @@ main(int argc, char *argv[])
         }
     }
 
-    bn = tio.c_cflag & CBAUD;
+    /* Field c_ospeed is always filled by kernel with exact baud rate value,
+       kernel tries to round c_ospeed to some Bnnn constant in 2% tolerance,
+       if it is not possible then BOTHER is set */
 #ifdef BOTHER
-    if (bn == BOTHER)
-        n = tio.c_ospeed;
-    else
+    n = tio.c_ospeed;
+#else
+    bn = tio.c_cflag & CBAUD;
+    n = map_bn_to_n(bn);
 #endif
-        n = map_bn_to_n(bn);
     printf("output baud rate: ");
     if (n != (unsigned int)-1)
         printf("%u\n", n);
     else
         printf("unknown\n");
 
+    /* B0 indicates that input baud rate is set to the output baud rate */
+#ifdef BOTHER
+    n = tio.c_ispeed;
+#else
 #ifdef IBSHIFT
     bn = (tio.c_cflag >> IBSHIFT) & CBAUD;
     if (bn == B0)
 #endif
         bn = tio.c_cflag & CBAUD;
-#ifdef BOTHER
-    if (bn == BOTHER)
-        n = tio.c_ispeed;
-    else
+    n = map_bn_to_n(bn);
 #endif
-        n = map_bn_to_n(bn);
     printf("input baud rate: ");
     if (n != (unsigned int)-1)
         printf("%u\n", n);
