@@ -92,6 +92,7 @@ main(int argc, char *argv[])
 #else
     struct termios tio;
 #endif
+    struct serial_struct ser;
     unsigned int n;
     tcflag_t bn;
     int fd, rc;
@@ -134,6 +135,20 @@ main(int argc, char *argv[])
             close(fd);
             exit(EXIT_FAILURE);
 #endif
+        } else if (n == 38400) {
+            rc = ioctl(fd, TIOCGSERIAL, &ser);
+            if (!rc && (ser.flags & ASYNC_SPD_MASK)) {
+                /* Clear ASYNC_SPD_MASK flag via TIOCSSERIAL
+                   as it aliases 38400 to some other baud rate */
+                ser.flags &= ~ASYNC_SPD_MASK;
+                ser.custom_divisor = 0;
+                rc = ioctl(fd, TIOCSSERIAL, &ser);
+                if (rc) {
+                    perror("TIOCSSERIAL");
+                    close(fd);
+                    exit(EXIT_FAILURE);
+                }
+            }
         }
         tio.c_cflag &= ~CBAUD;
         tio.c_cflag |= bn;
