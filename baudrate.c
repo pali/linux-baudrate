@@ -3,6 +3,7 @@
 
 #include <asm/termbits.h>
 #include <fcntl.h>
+#include <linux/serial.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/ioctl.h>
@@ -54,6 +55,33 @@ map_bn_to_n(tcflag_t bn)
     return (unsigned int)-1;
 }
 #endif
+
+static unsigned int
+get_spd_38400_alias(int fd)
+{
+    struct serial_struct ser;
+    int rc;
+
+    rc = ioctl(fd, TIOCGSERIAL, &ser);
+    if (rc)
+        return 38400; /* ASYNC_SPD_MASK is unsupported */
+
+    if (!(ser.flags & ASYNC_SPD_MASK))
+        return 38400; /* ASYNC_SPD_MASK is not set */
+
+    if ((ser.flags & ASYNC_SPD_MASK) == ASYNC_SPD_HI)
+        return 56000;
+    else if ((ser.flags & ASYNC_SPD_MASK) == ASYNC_SPD_VHI)
+        return 115200;
+    else if ((ser.flags & ASYNC_SPD_MASK) == ASYNC_SPD_SHI)
+        return 230400;
+    else if ((ser.flags & ASYNC_SPD_MASK) == ASYNC_SPD_WARP)
+        return 460800;
+    else if ((ser.flags & ASYNC_SPD_MASK) == ASYNC_SPD_CUST)
+        return (ser.baud_base + ser.custom_divisor/2) / ser.custom_divisor;
+    else
+        return (unsigned int)-1;
+}
 
 int
 main(int argc, char *argv[])
@@ -190,6 +218,9 @@ main(int argc, char *argv[])
     bn = tio.c_cflag & CBAUD;
     n = map_bn_to_n(bn);
 #endif
+    /* baud rate 38400 can be aliased by ASYNC_SPD_MASK flag */
+    if (n == 38400)
+        n = get_spd_38400_alias(fd);
     printf("output baud rate: ");
     if (n != (unsigned int)-1)
         printf("%u\n", n);
@@ -207,6 +238,9 @@ main(int argc, char *argv[])
         bn = tio.c_cflag & CBAUD;
     n = map_bn_to_n(bn);
 #endif
+    /* baud rate 38400 can be aliased by ASYNC_SPD_MASK flag */
+    if (n == 38400)
+        n = get_spd_38400_alias(fd);
     printf("input baud rate: ");
     if (n != (unsigned int)-1)
         printf("%u\n", n);
