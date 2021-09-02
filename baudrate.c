@@ -131,9 +131,25 @@ main(int argc, char *argv[])
 #ifdef BOTHER
             bn = BOTHER;
 #else
-            fprintf(stderr, "baud rate %u is unsupported\n", n);
-            close(fd);
-            exit(EXIT_FAILURE);
+            rc = ioctl(fd, TIOCGSERIAL, &ser);
+            if (rc) {
+                fprintf(stderr, "baud rate %u is unsupported\n", n);
+                close(fd);
+                exit(EXIT_FAILURE);
+            }
+            /* B38400 is aliased to different baud rate configured by
+               custom_divisor field when ASYNC_SPD_MASK flag is set to
+               ASYNC_SPD_CUST value via TIOCSSERIAL */
+            bn = B38400;
+            ser.flags &= ~ASYNC_SPD_MASK;
+            ser.flags |= ASYNC_SPD_CUST;
+            ser.custom_divisor = (ser.baud_base + n/2) / n;
+            rc = ioctl(fd, TIOCSSERIAL, &ser);
+            if (rc) {
+                perror("TIOCSSERIAL");
+                close(fd);
+                exit(EXIT_FAILURE);
+            }
 #endif
         } else if (n == 38400) {
             rc = ioctl(fd, TIOCGSERIAL, &ser);
@@ -164,9 +180,13 @@ main(int argc, char *argv[])
 #ifdef BOTHER
                 bn = BOTHER;
 #else
-                fprintf(stderr, "baud rate %u is unsupported\n", n);
-                close(fd);
-                exit(EXIT_FAILURE);
+                if (n != (unsigned int)atoi(argv[2])) {
+                    fprintf(stderr, "input baud rate %u is unsupported\n", n);
+                    close(fd);
+                    exit(EXIT_FAILURE);
+                }
+                /* Set B38400 for ASYNC_SPD_CUST */
+                bn = B38400;
 #endif
             }
         }
