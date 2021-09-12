@@ -1,15 +1,17 @@
 /* SPDX-FileCopyrightText: 2021 Pali Rohár <pali@kernel.org> */
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 
-#include <asm/ioctls.h>
-#include <asm/termbits.h>
-#include <fcntl.h>
-#include <linux/serial.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <unistd.h>
+
+#include <fcntl.h> /* for open() */
+#include <unistd.h> /* for close() */
+#include <sys/types.h> /* for O_* */
+#include <sys/ioctl.h> /* for ioctl() */
+
+#include <asm/ioctls.h> /* for TCGETS, TCSETS, TCGETS2, TCSETS2 */
+#include <asm/termbits.h> /* for BOTHER, Bnnn, struct termios, struct termios2 */
+#include <linux/serial.h> /* for ASYNC_SPD_MASK, struct serial_struct */
 
 #define B(n) { B##n, n }
 static struct { tcflag_t bn; unsigned int n; }
