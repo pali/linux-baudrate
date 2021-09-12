@@ -1,6 +1,7 @@
 /* SPDX-FileCopyrightText: 2021 Pali Rohár <pali@kernel.org> */
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 
+#include <asm/ioctls.h>
 #include <asm/termbits.h>
 #include <fcntl.h>
 #include <linux/serial.h>
