@@ -192,6 +192,15 @@ main(int argc, char *argv[])
                 bn = B38400;
 #endif
             }
+            if ((tio.c_cflag & CBAUD) != B0 && n == 0) {
+#ifdef BOTHER
+                bn = BOTHER;
+#else
+                fprintf(stderr, "input baud rate cannot be zero\n");
+                close(fd);
+                exit(EXIT_FAILURE);
+#endif
+            }
         }
 
         /* Clear the current input baud rate and fill a new value */
