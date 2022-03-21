@@ -9,9 +9,9 @@
 #include <sys/types.h> /* for O_* */
 #include <sys/ioctl.h> /* for ioctl() */
 
-#include <asm/ioctls.h> /* for TCGETS, TCSETS, TCGETS2, TCSETS2 */
+#include <asm/ioctls.h> /* for TCGETS, TCSETS, TCGETS2, TCSETS2, TIOCGSERIAL, TIOCSSERIAL */
 #include <asm/termbits.h> /* for BOTHER, Bnnn, struct termios, struct termios2 */
-#include <linux/serial.h> /* for ASYNC_SPD_MASK, struct serial_struct */
+#include <linux/serial.h> /* for ASYNC_SPD_*, struct serial_struct */
 
 #define B(n) { B##n, n }
 static struct { tcflag_t bn; unsigned int n; }
