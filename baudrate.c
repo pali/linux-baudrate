@@ -60,7 +60,7 @@ map_bn_to_n(tcflag_t bn)
 #endif
 
 static unsigned int
-get_spd_38400_alias(int fd)
+get_spd_B38400_alias(int fd)
 {
     struct serial_struct ser;
     int rc;
@@ -262,35 +262,35 @@ main(int argc, char *argv[])
     /* Field c_ospeed is always filled by kernel with exact baud rate value,
        kernel tries to round c_ospeed to some Bnnn constant in 2% tolerance,
        if it is not possible then BOTHER is set */
+    bn = tio.c_cflag & CBAUD;
 #ifdef BOTHER
     n = tio.c_ospeed;
 #else
-    bn = tio.c_cflag & CBAUD;
     n = map_bn_to_n(bn);
 #endif
-    /* baud rate 38400 can be aliased by ASYNC_SPD_MASK flag */
-    if (n == 38400)
-        n = get_spd_38400_alias(fd);
+    /* B38400 can be aliased by ASYNC_SPD_MASK flag */
+    if (bn == B38400)
+        n = get_spd_B38400_alias(fd);
     printf("output baud rate: ");
     if (n != (unsigned int)-1)
         printf("%u\n", n);
     else
         printf("unknown\n");
 
-    /* B0 indicates that input baud rate is set to the output baud rate */
-#ifdef BOTHER
-    n = tio.c_ispeed;
-#else
 #ifdef IBSHIFT
     bn = (tio.c_cflag >> IBSHIFT) & CBAUD;
+    /* B0 indicates that input baud rate is set to the output baud rate */
     if (bn == B0)
 #endif
         bn = tio.c_cflag & CBAUD;
+#ifdef BOTHER
+    n = tio.c_ispeed;
+#else
     n = map_bn_to_n(bn);
 #endif
-    /* baud rate 38400 can be aliased by ASYNC_SPD_MASK flag */
-    if (n == 38400)
-        n = get_spd_38400_alias(fd);
+    /* B38400 can be aliased by ASYNC_SPD_MASK flag */
+    if (bn == B38400)
+        n = get_spd_B38400_alias(fd);
     printf("input baud rate: ");
     if (n != (unsigned int)-1)
         printf("%u\n", n);
