@@ -72,6 +72,9 @@ get_spd_38400_alias(int fd)
     if (!(ser.flags & ASYNC_SPD_MASK))
         return 38400; /* ASYNC_SPD_MASK is not set */
 
+    if ((ser.flags & ASYNC_SPD_MASK) == ASYNC_SPD_CUST && !ser.custom_divisor)
+        return 38400; /* ASYNC_SPD_CUST is not active */
+
     if ((ser.flags & ASYNC_SPD_MASK) == ASYNC_SPD_HI)
         return 56000;
     else if ((ser.flags & ASYNC_SPD_MASK) == ASYNC_SPD_VHI)
